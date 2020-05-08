@@ -1,0 +1,71 @@
+# Bài mini-project 13 
+.data
+inputMessage: .asciiz "Input number want to check: "
+errorMessage: .asciiz "Input value isn't valid!"
+luckyMessage: .asciiz "The ticket is lucky!"
+notluckyMessage: .asciiz "The ticket isn't lucky!" 
+
+.text
+START:	
+	li $t0, 10				# $t0 = 10 => constant
+	li $s1, 0				# $s0 : count number of digits. Init $s0 = 0
+	li $s4, 0				# $s4 : sum of all digits in input value. Init $s4 = 0
+	li $s5, 0				# $s5 = sum of right-half digits in input value. Init $s5 = 0 
+MAIN: 						# MAIN program
+	jal INPUT				# Call INPUT procedure  to get input value 
+	jal COUNT				# Call COUNT procedure to count number of digits and calculate sum of all digits
+	andi $t4 , $s1 , 1			# Check number of digits is even or odd ? $t4 = ($s1 is even) ? 0 : 1
+	bne $t4, $zero, ERROR			# If number of digits isn't even ($t4 != 0) => go to ERROR
+	div $s1, $s1, 2				# Calculate $s1 = $s1 / 2 => half digits in input value
+	jal SUM_HALF				# Call SUM_HALF procedure to calculate sum of right-half digits in input value.
+	add $s5, $s5, $s5			# Sum of digits = sum_half * 2
+	beq $s5, $s4, LUCKY			# If sum = sum_half * 2 => input value is lucky number
+	j NOT_LUCKY				# Else input value isn't lucky number
+		
+INPUT:						# Get ticket number want to check
+	li $v0, 51				# Call InputDialogInt(51) => get input: ticket number
+	la $a0, inputMessage			# $v0: code, $a0: message string, $a0: input value, $a1: input status
+	syscall					
+	bne $a1, $zero, ERROR			# If input isn't number => $a1 != 0 => error => Go to ERRROR 
+	add $s0, $a0, $zero			# $s0 = value input
+	add $t1, $s0, $zero			# $t1 = $s0
+	add $t2, $s0, $zero			# $t2 = $s0
+	jr $ra					# Jump to calling in MAIN 
+	
+COUNT:						# Count all number digits in input value + calculate sum of all digits
+	div $t1, $t0             		# $t1 / 10 and $t1 % 10 
+	mflo $t1                		# $t1 = quotient => $t1 = $t1 / 10 
+	mfhi $t3                		# $t3 = remainder => $t3 = digit = $t1 % 10
+	add $s4, $s4, $t3         		# Sum = sum + digit
+	add $s1, $s1, 1				# Count = count + 1
+	bne $t1, $zero, COUNT   		# if $t1 != 0 => countinue the loop	
+	jr $ra					# Jump to calling in MAIN 
+
+SUM_HALF: 					# Calculate sum of right-half digits
+	div $t2, $t0             		# $t2 / 10 and $t2 % 10
+	mflo $t2                		# $t2 = quotient => $t2 = $t2 / 10
+	mfhi $t3                		# $t3 = remainder => $t3 = digit = $t1 % 10
+	add $s5, $s5, $t3         		# Sum_half = sum_half + digit
+	sub $s1, $s1, 1				# Decrease the number of digits
+	bne $s1, $zero, SUM_HALF  		# If $s1 != 0 => countinue the loop
+	jr $ra					# Jump to calling in MAIN 
+	
+ERROR: 						# Show message error when input isn't number or number of digits isn't even.
+	li $v0, 55				# Call MessageDialog(51) => Show error message
+	la $a0, errorMessage			# $v0: code, $a0: message string
+	syscall
+	j EXIT					# Exit program
+	
+LUCKY:						# Show message input value is lucky number
+	li $v0, 55 				# Call MessageDialog(51) => Show error message
+	la $a0, luckyMessage 			# $v0: code, $a0: message string
+	syscall
+	j EXIT					# Exit program
+	
+NOT_LUCKY:					# Show message input value isn't lucky number
+	li $v0, 55 				# Call MessageDialog(51) => Show error message
+	la $a0, notluckyMessage  		# $v0: code, $a0: message string
+	syscall	
+	j EXIT					# Exit program
+
+EXIT:
