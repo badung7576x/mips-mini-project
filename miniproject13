@@ -2,13 +2,13 @@
 .data
 inputMessage: .asciiz "Input number want to check: "
 errorMessage: .asciiz "Input value isn't valid!"
-luckyMessage: .asciiz "The ticket is lucky!"
-notluckyMessage: .asciiz "The ticket isn't lucky!" 
+luckyMessage: .asciiz "isLucky(n) = true"
+notluckyMessage: .asciiz "isLucky(n) = false" 
 
 .text
 START:	
 	li $t0, 10				# $t0 = 10 => constant
-	li $s1, 0				# $s0 : count number of digits. Init $s0 = 0
+	li $s1, 0				# $s1 : count number of digits. Init $s1 = 0
 	li $s4, 0				# $s4 : sum of all digits in input value. Init $s4 = 0
 	li $s5, 0				# $s5 = sum of right-half digits in input value. Init $s5 = 0 
 MAIN: 						# MAIN program
@@ -26,7 +26,7 @@ INPUT:						# Get ticket number want to check
 	li $v0, 51				# Call InputDialogInt(51) => get input: ticket number
 	la $a0, inputMessage			# $v0: code, $a0: message string, $a0: input value, $a1: input status
 	syscall					
-	bne $a1, $zero, ERROR			# If input isn't number => $a1 != 0 => error => Go to ERRROR 
+	bne $a1, $zero, ERROR			# If input isn't number => $a1 != 0 => error => Go to ERROR 
 	add $s0, $a0, $zero			# $s0 = value input
 	add $t1, $s0, $zero			# $t1 = $s0
 	add $t2, $s0, $zero			# $t2 = $s0
